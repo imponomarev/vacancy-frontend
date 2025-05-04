@@ -20,6 +20,7 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
+    "@7nohe/openapi-react-query-codegen": "0.0.0-f2301bcc5f2388f4db0d0c2a8ab9ca40c7830b71",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -29,5 +30,8 @@
     "eslint-config-next": "15.3.1",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "scripts": {
+    "generate:api": "openapi-rq -i src/backend/openapi.json -o src/api -c axios"
   }
 }
