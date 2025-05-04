@@ -1,24 +1,27 @@
-import axios, {AxiosRequestConfig} from "axios";
+import axios from "axios";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 import { getSession } from "next-auth/react";
+import { authOptions } from "@/lib/auth";
 
 export const apiClient = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,   // ← точно заполнена
+    baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
-apiClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
-    const attach = (token?: string | null) => {
-        if (token) config.headers = { ...config.headers, Authorization: `Bearer ${token}` };
+apiClient.interceptors.request.use(async (config) => {
+    const attach = (t?: string | null) => {
+        if (t)
+            config.headers = {
+                ...config.headers,
+                Authorization: `Bearer ${t}`,
+            };
     };
 
     if (typeof window === "undefined") {
-        // RSC / API route
-        const sess = await getServerSession(authOptions);
-        attach((sess as any)?.backendToken);
+        const s = await getServerSession(authOptions);
+        attach((s as any)?.backendToken);
     } else {
-        const sess = await getSession();
-        attach((sess as any)?.backendToken);
+        const s = await getSession();
+        attach((s as any)?.backendToken);
     }
     return config;
 });

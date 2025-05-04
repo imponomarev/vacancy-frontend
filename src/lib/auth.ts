@@ -1,32 +1,42 @@
 import Credentials from "next-auth/providers/credentials";
 import type { NextAuthOptions } from "next-auth";
 
+export interface BackendLogin {
+    token: string;
+}
+
 export const authOptions: NextAuthOptions = {
     session: { strategy: "jwt" },
 
     providers: [
         Credentials({
-            credentials: {
-                email: { label: "Email", type: "text" },
-                password: { label: "Пароль", type: "password" },
-            },
+            name: "Credentials",
             async authorize(creds) {
                 if (!creds) return null;
-                const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/auth/login?email=${creds.email}&pwd=${creds.password}`,
-                    { method: "POST" }
-                ).then((r) => r.json());
-                return { id: creds.email, token: res.token };
+
+                const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`);
+                url.searchParams.set("email", creds.email as string);
+                url.searchParams.set("pwd", creds.password as string);
+
+                const res = await fetch(url.toString(), { method: "POST" });
+                if (!res.ok) return null;
+                const json = (await res.json()) as BackendLogin;
+
+                return json.token ? { id: creds.email as string, backendToken: json.token } : null;
+            },
+            credentials: {
+                email: { label: "E‑mail", type: "text" },
+                password: { label: "Пароль", type: "password" },
             },
         }),
     ],
 
     callbacks: {
-        jwt: async ({ token, user }) => {
-            if (user) token.backendToken = (user as any).token;
+        jwt({ token, user }) {
+            if (user) token.backendToken = (user as any).backendToken;
             return token;
         },
-        session: async ({ session, token }) => {
+        session({ session, token }) {
             (session as any).backendToken = token.backendToken;
             return session;
         },
