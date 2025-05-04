@@ -11,6 +11,7 @@
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-intersection-observer": "^9.16.0",
     "zod": "^3.24.3"
   },
   "devDependencies": {
@@ -22,6 +23,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
     "orval": "^7.9.0",
+    "prettier": "^3.5.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
