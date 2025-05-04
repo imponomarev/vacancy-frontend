@@ -1,5 +1,5 @@
 import {AxiosRequestConfig} from 'axios';
-import {apiClient} from '@/lib/axios';
+import {apiClient} from './axios';
 
 export const axiosFetcher = <TData>(
     config: AxiosRequestConfig,

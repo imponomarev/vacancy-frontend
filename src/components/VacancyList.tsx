@@ -1,8 +1,8 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { Card, Badge, Skeleton } from "@heroui/react";
-import { useVacancyControllerSearch } from "@/api/vacancy-controller";
+import { useSearch as useVacancySearch } from "@/api/vacancy-controller/vacancy-controller";
 import LoadMoreButton from "./LoadMoreButton";
 
 export default function VacancyList() {
@@ -11,11 +11,9 @@ export default function VacancyList() {
         sp.entries()
     ) as Record<string, string>;
 
-    /** локальное состояние номера страницы— начинаем с 0,
-     *   каждый «load more»→ increment */
     const [page, setPage] = useState(0);
 
-    const { data, isFetching, refetch } = useVacancyControllerSearch(
+    const query = useVacancySearch(
         { text, area, page, perPage: Number(perPage) },
         {
             query: {
@@ -25,30 +23,22 @@ export default function VacancyList() {
         }
     );
 
-    /** если пришло меньше, чем perPage— страниц больше нет */
-    const noMore =
-        (data?.length ?? 0) < Number(perPage) || data === undefined;
+    const vacancies = query.data ?? [];
+    const noMore = vacancies.length < Number(perPage);
 
-    const handleLoadMore = () => {
-        if (!noMore) {
-            setPage((p) => p + 1);
-        }
-    };
+    // сбрасываем страницу при смене фильтров
+    useEffect(() => {
+        setPage(0);
+    }, [text, area]);
 
-    // перезапускаем поиск, если пользователь изменил URL‑параметры
-    // (например, вернулся стрелкой «назад» и поменял город)
-    //  eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => setPage(0), [text, area]);
-
-    if (isFetching && page === 0) {
-        // первый запрос— показываем скелет
+    if (query.isFetching && page === 0) {
         return <Skeleton className="h-32 w-full" />;
     }
 
     return (
         <>
             <div className="grid gap-4 mt-6">
-                {data?.map((v) => (
+                {vacancies.map((v) => (
                     <Card key={v.externalId} className="p-4">
                         <h3 className="text-lg font-semibold">{v.title}</h3>
                         <p className="text-sm text-slate-500">{v.company}</p>
@@ -62,7 +52,10 @@ export default function VacancyList() {
             </div>
 
             {!noMore && (
-                <LoadMoreButton onClick={handleLoadMore} disabled={isFetching} />
+                <LoadMoreButton
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={query.isFetching}
+                />
             )}
         </>
     );
