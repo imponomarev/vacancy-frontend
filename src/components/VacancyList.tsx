@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, Badge, Skeleton } from "@heroui/react";
 import { useSearch as useVacancySearch } from "@/api/vacancy-controller/vacancy-controller";
 import LoadMoreButton from "./LoadMoreButton";
+import VacancyCard from "@/components/VacancyCard";
 
 export default function VacancyList() {
     const sp = useSearchParams();
@@ -39,15 +40,7 @@ export default function VacancyList() {
         <>
             <div className="grid gap-4 mt-6">
                 {vacancies.map((v) => (
-                    <Card key={v.externalId} className="p-4">
-                        <h3 className="text-lg font-semibold">{v.title}</h3>
-                        <p className="text-sm text-slate-500">{v.company}</p>
-                        {v.salaryFrom && (
-                            <Badge className="mt-2">
-                                {v.salaryFrom}‑{v.salaryTo ?? "…"} {v.currency}
-                            </Badge>
-                        )}
-                    </Card>
+                    <VacancyCard v={v} key={v.externalId}/>
                 ))}
             </div>
 

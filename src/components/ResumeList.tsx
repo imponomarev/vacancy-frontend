@@ -5,6 +5,7 @@ import {Skeleton} from "@heroui/react";
 import {useSearch1 as useResumeSearch} from "@/api/resume-controller/resume-controller";
 import LoadMoreButton from "./LoadMoreButton";
 import ResumeCard from "./ResumeCard";
+import PaymentWidget from "@/components/PaymentWidget";
 
 export default function ResumeList() {
     const sp = useSearchParams();
@@ -18,6 +19,17 @@ export default function ResumeList() {
         {text, area, page, perPage: Number(perPage)},
         {query: {enabled: !!text && !!area, keepPreviousData: true}}
     );
+
+    if (query.error && (query.error as any).response?.status === 403) {
+        return (
+            <div className="mt-10 text-center">
+                <p className="mb-4 text-lg">
+                    Поиск резюме доступен только пользователям Pro.
+                </p>
+                <PaymentWidget onSuccess={() => query.refetch()} />
+            </div>
+        );
+    }
 
     const resumes = query.data ?? [];
     const noMore = resumes.length < Number(perPage);
