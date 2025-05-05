@@ -4,11 +4,14 @@ import {Resume} from "@/api/model";
 import {apiClient} from "@/lib/axios";
 
 interface Props {
-    params: { source: string; externalId: string };
+    params: Promise<{
+        source: string;
+        externalId: string;
+    }>;
 }
 
 export default async function ResumeDetail({params}: Props) {
-    const {source, externalId} = params;
+    const {source, externalId} = await params;
 
     const res = await apiClient.get<Resume[]>("/resume-favorites"); // пробуем из кэша
     const resume =
