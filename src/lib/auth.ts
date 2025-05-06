@@ -33,11 +33,15 @@ export const authOptions: NextAuthOptions = {
 
     callbacks: {
         jwt({ token, user }) {
-            if (user) token.backendToken = (user as any).backendToken;
+            if (user) {
+                token.backendToken = (user as any).backendToken;
+                token.role = (user as any).role;
+            }
             return token;
         },
         session({ session, token }) {
-            (session as any).backendToken = token.backendToken;
+            session.backendToken = token.backendToken as string;
+            session.user.role = (token.role as any) ?? "FREE";
             return session;
         },
     },

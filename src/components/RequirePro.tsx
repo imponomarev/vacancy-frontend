@@ -1,31 +1,30 @@
 "use client";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import { useSession } from "next-auth/react";
+import { Button, Modal } from "@heroui/react";
 import PaymentWidget from "@/components/PaymentWidget";
 
 export default function RequirePro({ children }: { children: ReactNode }) {
     const { data: session, status } = useSession();
-    const [pro, setPro] = useState(false);
+    const [open, setOpen] = useState(false);
 
-    useEffect(() => {
-        // бэкенд кладёт role=PRO в claim "role"
-        if (session?.user?.role === "PRO") setPro(true);
-    }, [session]);
-
-    // загрузка сессии
     if (status === "loading") return null;
+    if (session?.user.role === "PRO") return <>{children}</>;
 
-    // если не pro
-    if (!pro) {
-        return (
-            <div className="max-w-lg mx-auto py-10">
-                <p className="text-lg mb-4 text-center">
-                    Поиск резюме доступен только пользователям Pro.
+    /* FREE user */
+    return (
+        <div className="max-w-lg mx-auto py-10 text-center">
+            <p className="text-lg mb-4">Поиск резюме доступен только пользователям Pro.</p>
+
+            <Button onClick={() => setOpen(true)}>Купить Pro</Button>
+
+            <Modal open={open} onOpenChange={setOpen}>
+                {/* simple stub until you have real confirmation_token */}
+                <p className="p-6 text-center text-red-500">
+                    Оплата пока не настроена<br /> (нужен confirmation_token от YooKassa)
                 </p>
-                <PaymentWidget onSuccess={() => setPro(true)} />
-            </div>
-        );
-    }
-
-    return <>{children}</>;
+                {/* if token available -> <PaymentWidget …/> */}
+            </Modal>
+        </div>
+    );
 }
