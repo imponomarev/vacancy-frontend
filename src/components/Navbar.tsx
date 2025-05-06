@@ -2,9 +2,11 @@
 import Link from "next/link";
 import {useSession, signOut} from "next-auth/react";
 import {Button} from "@heroui/react";
+import {usePathname} from "next/navigation";
 
 export default function Navbar() {
     const {data: session, status} = useSession();
+    const path = usePathname();
 
     return (
         <header className="sticky top-0 bg-white shadow px-4 py-2 flex items-center gap-4">
@@ -17,6 +19,12 @@ export default function Navbar() {
             )}
 
             <div className="ml-auto">
+                {!session && path !== "/login" && (
+                    <>
+                        <Link href="/login" className="mr-2 text-sm">Вход</Link>
+                        <Link href="/register" className="text-sm">Регистрация</Link>
+                    </>
+                )}
                 {status === "authenticated" ? (
                     <Button size="sm" variant="ghost" onClick={() => signOut()}>
                         Выйти

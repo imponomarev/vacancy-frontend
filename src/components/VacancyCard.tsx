@@ -39,10 +39,12 @@ export default function VacancyCard({v}: { v: Vacancy }) {
                 <h3 className="text-lg font-semibold">{v.title}</h3>
                 <p className="text-sm text-slate-500">{v.company}</p>
 
-                {v.salaryFrom && (
+                {v.salaryFrom ? (
                     <Badge className="mt-2">
                         {v.salaryFrom}‑{v.salaryTo ?? "…"} {v.currency}
                     </Badge>
+                ) : (
+                    <Badge className="mt-2">ЗП не указана</Badge>
                 )}
 
                 {v.publishedAt && (
@@ -57,6 +59,14 @@ export default function VacancyCard({v}: { v: Vacancy }) {
                         {v.description}
                     </p>
                 )}
+
+                {v.experienceReq && (
+                    <p className="text-xs text-slate-500 mt-1">Опыт: {v.experienceReq}</p>
+                )}
+
+                <p className="text-xs text-slate-500">
+                    График: {v.schedule ?? "не указан"} • Тип: {v.employmentType ?? "не указан"}
+                </p>
             </Link>
         </Card>
     );

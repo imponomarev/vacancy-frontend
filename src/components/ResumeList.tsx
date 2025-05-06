@@ -21,14 +21,7 @@ export default function ResumeList() {
     );
 
     if (query.error && (query.error as any).response?.status === 403) {
-        return (
-            <div className="mt-10 text-center">
-                <p className="mb-4 text-lg">
-                    Поиск резюме доступен только пользователям Pro.
-                </p>
-                <PaymentWidget onSuccess={() => query.refetch()} />
-            </div>
-        );
+        return null;
     }
 
     const resumes = query.data ?? [];

@@ -3,7 +3,6 @@ import {apiClient} from "@/lib/axios";
 import type {Vacancy, Resume} from "@/api/model";
 
 export function useVacancyFavourites() {
-    const qc = useQueryClient();
 
     const list = useQuery({
         queryKey: ["vacFav"],
@@ -13,14 +12,12 @@ export function useVacancyFavourites() {
     const toggle = useMutation({
         mutationFn: (v: Vacancy) =>
             apiClient.post("/favorites", v).then(r => r.data),
-        onSuccess: () => qc.invalidateQueries({queryKey: ["vacFav"]}),
     });
 
     return {...list, toggle};
 }
 
 export function useResumeFavourites() {
-    const qc = useQueryClient();
 
     const list = useQuery({
         queryKey: ["resFav"],
@@ -30,7 +27,6 @@ export function useResumeFavourites() {
     const toggle = useMutation({
         mutationFn: (r: Resume) =>
             apiClient.post("/resume-favorites", r).then(r => r.data),
-        onSuccess: () => qc.invalidateQueries({queryKey: ["resFav"]}),
     });
 
     return {...list, toggle};
