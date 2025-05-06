@@ -1,3 +1,5 @@
+"use client";
+
 import { useVacancyFavourites, useResumeFavourites } from "@/hooks/useFavourites";
 import VacancyCard from "@/components/VacancyCard";
 import ResumeCard from "@/components/ResumeCard";
