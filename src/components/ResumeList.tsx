@@ -1,27 +1,45 @@
 "use client";
+
 import {useSearchParams} from "next/navigation";
 import {useEffect, useState} from "react";
 import {Skeleton} from "@heroui/react";
 import {useSearch1 as useResumeSearch} from "@/api/resume-controller/resume-controller";
 import LoadMoreButton from "./LoadMoreButton";
 import ResumeCard from "./ResumeCard";
-import PaymentWidget from "@/components/PaymentWidget";
+import {useSession} from "next-auth/react";
 
 export default function ResumeList() {
+    const {data: session, status} = useSession();
     const sp = useSearchParams();
     const {text, area, perPage = "20"} = Object.fromEntries(
         sp.entries()
     ) as Record<string, string>;
 
-    const [page, setPage] = useState(0);
+    // 1) Ждём загрузки сессии
+    if (status === "loading") {
+        return <Skeleton className="h-32 w-full"/>;
+    }
 
+    // 2) Блокируем free-пользователей
+    if (session?.user.role !== "PRO") {
+        return (
+            <p className="text-center py-10">
+                Поиск резюме доступен только пользователям Pro.
+            </p>
+        );
+    }
+
+    const [page, setPage] = useState(0);
     const query = useResumeSearch(
         {text, area, page, perPage: Number(perPage)},
         {query: {enabled: !!text && !!area, keepPreviousData: true}}
     );
 
-    if (query.error && (query.error as any).response?.status === 403) {
-        return null;
+    // 3) Ошибка запроса → выводим текст
+    if (!query.isFetching && query.isError) {
+        const err = query.error as any;
+        const msg = err.response?.data?.message || "Ошибка загрузки резюме";
+        return <p className="text-red-500 py-4 text-center">{msg}</p>;
     }
 
     const resumes = query.data ?? [];
@@ -29,7 +47,9 @@ export default function ResumeList() {
 
     useEffect(() => setPage(0), [text, area]);
 
-    if (query.isFetching && page === 0) return <Skeleton className="h-32 w-full"/>;
+    if (query.isFetching && page === 0) {
+        return <Skeleton className="h-32 w-full"/>;
+    }
 
     return (
         <>
@@ -39,7 +59,10 @@ export default function ResumeList() {
                 ))}
             </div>
             {!noMore && (
-                <LoadMoreButton onClick={() => setPage((p) => p + 1)} disabled={query.isFetching}/>
+                <LoadMoreButton
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={query.isFetching}
+                />
             )}
         </>
     );
