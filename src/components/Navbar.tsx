@@ -19,7 +19,7 @@ export default function Navbar() {
 
     return (
         <header className="sticky top-0 bg-white shadow px-4 py-2 flex items-center gap-4">
-            <Link href="/" className="font-bold text-primary">
+            <Link href="/vacancies" className="font-bold text-primary">
                 VacAgg
             </Link>
 
@@ -46,7 +46,11 @@ export default function Navbar() {
                 )}
 
                 {status === "authenticated" && (
-                    <Button size="sm" variant="ghost" onClick={() => signOut()}>
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => signOut({callbackUrl: "/login"})}
+                    >
                         Выйти
                     </Button>
                 )}

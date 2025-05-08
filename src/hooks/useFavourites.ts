@@ -1,4 +1,4 @@
-import {useQuery, useMutation, useQueryClient} from "@tanstack/react-query";
+import {useQuery, useMutation, useQueryClient, UseQueryOptions} from "@tanstack/react-query";
 import {apiClient} from "@/lib/axios";
 import type {Vacancy, Resume} from "@/api/model";
 
@@ -15,59 +15,76 @@ function mutateArray<T extends { source: string; externalId: string }>(
 // ─── Vacancies ───────────────────────────────────────────────────
 export function useVacancyFavourites() {
     const qc = useQueryClient();
-    const list = useQuery({
+
+    const list = useQuery<Vacancy[]>({
         queryKey: ["vacFav"],
         queryFn: () => apiClient.get<Vacancy[]>("/favorites").then((r) => r.data),
     });
 
-    const toggle = useMutation({
-        mutationFn: async (v: Vacancy) => {
+    const toggle = useMutation<void, unknown, Vacancy>({
+        mutationFn: async (v) => {
             const inFav = list.data?.some(
                 (f) => f.source === v.source && f.externalId === v.externalId
             );
-            return inFav
-                ? apiClient.delete(
-                    `/favorites/${v.source}/${v.externalId}`
-                ) /* DELETE */
-                : apiClient.post("/favorites", v); /* ADD   */
+            if (inFav) {
+                await apiClient.delete(`/favorites/${v.source}/${v.externalId}`);
+            } else {
+                await apiClient.post("/favorites", v);
+            }
         },
         onMutate: (v) => {
             qc.setQueryData<Vacancy[]>(["vacFav"], (prev = []) =>
                 mutateArray(prev, v)
             );
         },
-        onError: () => qc.invalidateQueries({queryKey: ["vacFav"]}),
+        onError: () => {
+            qc.invalidateQueries({queryKey: ["vacFav"]});
+        },
+        onSettled: () => {
+            qc.invalidateQueries({queryKey: ["vacFav"]});
+        },
     });
 
     return {...list, toggle};
 }
 
 // ─── Resumes ─────────────────────────────────────────────────────
-export function useResumeFavourites() {
+export function useResumeFavourites(
+    filters: Record<string, unknown> = {},
+    options: UseQueryOptions<Resume[]> = {}
+) {
     const qc = useQueryClient();
-    const list = useQuery({
-        queryKey: ["resFav"],
+
+    // Прокидываем options.enabled сюда:
+    const list = useQuery<Resume[]>({
+        queryKey: ["resFav", filters],
         queryFn: () =>
-            apiClient.get<Resume[]>("/resume-favorites").then((r) => r.data),
+            apiClient.get<Resume[]>("/resume-favorites", {params: filters}).then((r) => r.data),
+        ...options,
     });
 
-    const toggle = useMutation({
-        mutationFn: async (r: Resume) => {
+    const toggle = useMutation<void, unknown, Resume>({
+        mutationFn: async (r) => {
             const inFav = list.data?.some(
                 (f) => f.source === r.source && f.externalId === r.externalId
             );
-            return inFav
-                ? apiClient.delete(
-                    `/resume-favorites/${r.source}/${r.externalId}`
-                )
-                : apiClient.post("/resume-favourites", r);
+            if (inFav) {
+                await apiClient.delete(`/resume-favorites/${r.source}/${r.externalId}`);
+            } else {
+                await apiClient.post("/resume-favorites", r);
+            }
         },
         onMutate: (r) => {
-            qc.setQueryData<Resume[]>(["resFav"], (prev = []) =>
+            qc.setQueryData<Resume[]>(["resFav", filters], (prev = []) =>
                 mutateArray(prev, r)
             );
         },
-        onError: () => qc.invalidateQueries({queryKey: ["resFav"]}),
+        onError: () => {
+            qc.invalidateQueries({queryKey: ["resFav", filters]});
+        },
+        onSettled: () => {
+            qc.invalidateQueries({queryKey: ["resFav", filters]});
+        },
     });
 
     return {...list, toggle};

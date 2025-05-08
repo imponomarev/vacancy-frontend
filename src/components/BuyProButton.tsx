@@ -1,29 +1,60 @@
 "use client";
 
-import {useState} from "react";
-import {Button} from "@heroui/react";
-import {apiClient} from "@/lib/axios";
-import PaymentWidget from "./PaymentWidget";
+import React from "react";
+import { Button } from "@heroui/react";
+import { apiClient } from "@/lib/axios";
+import YooWidget, { YooMoneyCheckoutWidgetConfig } from "react-yoomoneycheckoutwidget";
 
-export default function BuyProButton() {
-    const [confirmationToken, setConfirmationToken] = useState<string | null>(null);
+interface BuyProButtonProps {
+    /** Если передать onSuccess — вызовется вместо редиректа */
+    onSuccess?: () => void;
+}
+
+export default function BuyProButton({ onSuccess }: BuyProButtonProps) {
+    const [confirmationToken, setConfirmationToken] = React.useState<string | null>(null);
 
     async function handleBuyPro() {
         try {
             const resp = await apiClient.post<string>("/payments/pro");
-            const tokenOrUrl = resp.data;
+            const tokOrUrl = resp.data;
 
-            if (tokenOrUrl.startsWith("http")) {
-                window.location.href = tokenOrUrl;
+            if (tokOrUrl.startsWith("http")) {
+                window.location.href = tokOrUrl;
             } else {
-                setConfirmationToken(tokenOrUrl);
+                setConfirmationToken(tokOrUrl);
             }
-        } catch (error: any) {
-            alert(error.response?.data?.message || error.message);
+        } catch (err: any) {
+            if (err.response?.status === 401) {
+                setConfirmationToken("invalid-token");
+            } else {
+                alert(err.response?.data?.message || err.message);
+            }
         }
     }
 
-    return confirmationToken
-        ? <PaymentWidget confirmationToken={confirmationToken}/>
-        : <Button onClick={handleBuyPro}>Купить PRO</Button>;
+    function handleComplete() {
+        if (onSuccess) {
+            onSuccess();
+        } else {
+            window.location.replace("/vacancies");
+        }
+    }
+
+    function handleModalClose() {
+        // просто возвращаем кнопку
+        setConfirmationToken(null);
+    }
+
+    if (confirmationToken) {
+        const config: YooMoneyCheckoutWidgetConfig = {
+            confirmation_token: confirmationToken,
+            customization: { modal: true },
+            success_callback: handleComplete,
+            error_callback: (err) => console.error("YooWidget error:", err),
+        };
+
+        return <YooWidget config={config} onModalClose={handleModalClose} />;
+    }
+
+    return <Button onClick={handleBuyPro}>Купить PRO</Button>;
 }
