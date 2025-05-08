@@ -6,6 +6,6 @@
  */
 
 export type RegisterParams = {
-email: string;
-pwd: string;
+  email: string;
+  pwd: string;
 };

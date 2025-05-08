@@ -4,10 +4,7 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -20,211 +17,268 @@ import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+  UseQueryResult,
+} from "@tanstack/react-query";
 
-import type {
-  Vacancy
-} from '.././model';
+import type { Vacancy } from ".././model";
 
-import { axiosFetcher } from '../../lib/axios-fetcher';
+import { axiosFetcher } from "../../lib/axios-fetcher";
 
-
-
-
-export const list1 = (
-    
- signal?: AbortSignal
-) => {
-      
-      
-      return axiosFetcher<Vacancy[]>(
-      {url: `/favorites`, method: 'GET', signal
-    },
-      );
-    }
-  
+export const list1 = (signal?: AbortSignal) => {
+  return axiosFetcher<Vacancy[]>({ url: `/favorites`, method: "GET", signal });
+};
 
 export const getList1QueryKey = () => {
-    return [`/favorites`] as const;
-    }
+  return [`/favorites`] as const;
+};
 
-    
-export const getList1QueryOptions = <TData = Awaited<ReturnType<typeof list1>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>>, }
-) => {
+export const getList1QueryOptions = <
+  TData = Awaited<ReturnType<typeof list1>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>
+  >;
+}) => {
+  const { query: queryOptions } = options ?? {};
 
-const {query: queryOptions} = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getList1QueryKey();
 
-  const queryKey =  queryOptions?.queryKey ?? getList1QueryKey();
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof list1>>> = ({
+    signal,
+  }) => list1(signal);
 
-  
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof list1>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof list1>>> = ({ signal }) => list1(signal);
+export type List1QueryResult = NonNullable<Awaited<ReturnType<typeof list1>>>;
+export type List1QueryError = unknown;
 
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type List1QueryResult = NonNullable<Awaited<ReturnType<typeof list1>>>
-export type List1QueryError = unknown
-
-
-export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>> & Pick<
+export function useList1<
+  TData = Awaited<ReturnType<typeof list1>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof list1>>,
           TError,
           Awaited<ReturnType<typeof list1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useList1<
+  TData = Awaited<ReturnType<typeof list1>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof list1>>,
           TError,
           Awaited<ReturnType<typeof list1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useList1<
+  TData = Awaited<ReturnType<typeof list1>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>>, }
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useList1<
+  TData = Awaited<ReturnType<typeof list1>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof list1>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getList1QueryOptions(options);
 
-  const queryOptions = getList1QueryOptions(options)
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey ;
+  query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
+export const like1 = (vacancy: Vacancy, signal?: AbortSignal) => {
+  return axiosFetcher<void>({
+    url: `/favorites`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: vacancy,
+    signal,
+  });
+};
 
+export const getLike1MutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof like1>>,
+    TError,
+    { data: Vacancy },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof like1>>,
+  TError,
+  { data: Vacancy },
+  TContext
+> => {
+  const mutationKey = ["like1"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
-export const like1 = (
-    vacancy: Vacancy,
- signal?: AbortSignal
-) => {
-      
-      
-      return axiosFetcher<void>(
-      {url: `/favorites`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: vacancy, signal
-    },
-      );
-    }
-  
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof like1>>,
+    { data: Vacancy }
+  > = (props) => {
+    const { data } = props ?? {};
 
+    return like1(data);
+  };
 
-export const getLike1MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof like1>>, TError,{data: Vacancy}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof like1>>, TError,{data: Vacancy}, TContext> => {
+  return { mutationFn, ...mutationOptions };
+};
 
-const mutationKey = ['like1'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+export type Like1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof like1>>
+>;
+export type Like1MutationBody = Vacancy;
+export type Like1MutationError = unknown;
 
-      
+export const useLike1 = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof like1>>,
+      TError,
+      { data: Vacancy },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof like1>>,
+  TError,
+  { data: Vacancy },
+  TContext
+> => {
+  const mutationOptions = getLike1MutationOptions(options);
 
+  return useMutation(mutationOptions, queryClient);
+};
+export const unlike1 = (source: string, externalId: string) => {
+  return axiosFetcher<void>({
+    url: `/favorites/${source}/${externalId}`,
+    method: "DELETE",
+  });
+};
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof like1>>, {data: Vacancy}> = (props) => {
-          const {data} = props ?? {};
+export const getUnlike1MutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof unlike1>>,
+    TError,
+    { source: string; externalId: string },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof unlike1>>,
+  TError,
+  { source: string; externalId: string },
+  TContext
+> => {
+  const mutationKey = ["unlike1"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
-          return  like1(data,)
-        }
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof unlike1>>,
+    { source: string; externalId: string }
+  > = (props) => {
+    const { source, externalId } = props ?? {};
 
-        
+    return unlike1(source, externalId);
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
-  return  { mutationFn, ...mutationOptions }}
+export type Unlike1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof unlike1>>
+>;
 
-    export type Like1MutationResult = NonNullable<Awaited<ReturnType<typeof like1>>>
-    export type Like1MutationBody = Vacancy
-    export type Like1MutationError = unknown
+export type Unlike1MutationError = unknown;
 
-    export const useLike1 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof like1>>, TError,{data: Vacancy}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof like1>>,
-        TError,
-        {data: Vacancy},
-        TContext
-      > => {
+export const useUnlike1 = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof unlike1>>,
+      TError,
+      { source: string; externalId: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof unlike1>>,
+  TError,
+  { source: string; externalId: string },
+  TContext
+> => {
+  const mutationOptions = getUnlike1MutationOptions(options);
 
-      const mutationOptions = getLike1MutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    export const unlike1 = (
-    source: string,
-    externalId: string,
- ) => {
-      
-      
-      return axiosFetcher<void>(
-      {url: `/favorites/${source}/${externalId}`, method: 'DELETE'
-    },
-      );
-    }
-  
-
-
-export const getUnlike1MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlike1>>, TError,{source: string;externalId: string}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof unlike1>>, TError,{source: string;externalId: string}, TContext> => {
-
-const mutationKey = ['unlike1'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unlike1>>, {source: string;externalId: string}> = (props) => {
-          const {source,externalId} = props ?? {};
-
-          return  unlike1(source,externalId,)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type Unlike1MutationResult = NonNullable<Awaited<ReturnType<typeof unlike1>>>
-    
-    export type Unlike1MutationError = unknown
-
-    export const useUnlike1 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlike1>>, TError,{source: string;externalId: string}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof unlike1>>,
-        TError,
-        {source: string;externalId: string},
-        TContext
-      > => {
-
-      const mutationOptions = getUnlike1MutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    
+  return useMutation(mutationOptions, queryClient);
+};

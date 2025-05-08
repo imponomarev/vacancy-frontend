@@ -286,6 +286,38 @@
                 "type": "string"
               }
             }
+          },
+          {
+            "name": "salaryFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "salaryTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "experience",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "NO_EXPERIENCE",
+                "BETWEEN_1_AND_3",
+                "BETWEEN_3_AND_6",
+                "MORE_THAN_6"
+              ]
+            }
           }
         ],
         "responses": {

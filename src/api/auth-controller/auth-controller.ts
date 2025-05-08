@@ -4,140 +4,164 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import {
-  useMutation
-} from '@tanstack/react-query';
+import { useMutation } from "@tanstack/react-query";
 import type {
   MutationFunction,
   QueryClient,
   UseMutationOptions,
-  UseMutationResult
-} from '@tanstack/react-query';
+  UseMutationResult,
+} from "@tanstack/react-query";
 
 import type {
   Login200,
   LoginParams,
   Register200,
-  RegisterParams
-} from '.././model';
+  RegisterParams,
+} from ".././model";
 
-import { axiosFetcher } from '../../lib/axios-fetcher';
+import { axiosFetcher } from "../../lib/axios-fetcher";
 
+export const register = (params: RegisterParams, signal?: AbortSignal) => {
+  return axiosFetcher<Register200>({
+    url: `/auth/register`,
+    method: "POST",
+    params,
+    signal,
+  });
+};
 
+export const getRegisterMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof register>>,
+    TError,
+    { params: RegisterParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof register>>,
+  TError,
+  { params: RegisterParams },
+  TContext
+> => {
+  const mutationKey = ["register"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof register>>,
+    { params: RegisterParams }
+  > = (props) => {
+    const { params } = props ?? {};
 
-export const register = (
-    params: RegisterParams,
- signal?: AbortSignal
-) => {
-      
-      
-      return axiosFetcher<Register200>(
-      {url: `/auth/register`, method: 'POST',
-        params, signal
-    },
-      );
-    }
-  
+    return register(params);
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
-export const getRegisterMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{params: RegisterParams}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{params: RegisterParams}, TContext> => {
+export type RegisterMutationResult = NonNullable<
+  Awaited<ReturnType<typeof register>>
+>;
 
-const mutationKey = ['register'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+export type RegisterMutationError = unknown;
 
-      
+export const useRegister = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof register>>,
+      TError,
+      { params: RegisterParams },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof register>>,
+  TError,
+  { params: RegisterParams },
+  TContext
+> => {
+  const mutationOptions = getRegisterMutationOptions(options);
 
+  return useMutation(mutationOptions, queryClient);
+};
+export const login = (params: LoginParams, signal?: AbortSignal) => {
+  return axiosFetcher<Login200>({
+    url: `/auth/login`,
+    method: "POST",
+    params,
+    signal,
+  });
+};
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof register>>, {params: RegisterParams}> = (props) => {
-          const {params} = props ?? {};
+export const getLoginMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof login>>,
+    TError,
+    { params: LoginParams },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof login>>,
+  TError,
+  { params: LoginParams },
+  TContext
+> => {
+  const mutationKey = ["login"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
-          return  register(params,)
-        }
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof login>>,
+    { params: LoginParams }
+  > = (props) => {
+    const { params } = props ?? {};
 
-        
+    return login(params);
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
-  return  { mutationFn, ...mutationOptions }}
+export type LoginMutationResult = NonNullable<
+  Awaited<ReturnType<typeof login>>
+>;
 
-    export type RegisterMutationResult = NonNullable<Awaited<ReturnType<typeof register>>>
-    
-    export type RegisterMutationError = unknown
+export type LoginMutationError = unknown;
 
-    export const useRegister = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{params: RegisterParams}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof register>>,
-        TError,
-        {params: RegisterParams},
-        TContext
-      > => {
+export const useLogin = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof login>>,
+      TError,
+      { params: LoginParams },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof login>>,
+  TError,
+  { params: LoginParams },
+  TContext
+> => {
+  const mutationOptions = getLoginMutationOptions(options);
 
-      const mutationOptions = getRegisterMutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    export const login = (
-    params: LoginParams,
- signal?: AbortSignal
-) => {
-      
-      
-      return axiosFetcher<Login200>(
-      {url: `/auth/login`, method: 'POST',
-        params, signal
-    },
-      );
-    }
-  
-
-
-export const getLoginMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{params: LoginParams}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{params: LoginParams}, TContext> => {
-
-const mutationKey = ['login'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof login>>, {params: LoginParams}> = (props) => {
-          const {params} = props ?? {};
-
-          return  login(params,)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type LoginMutationResult = NonNullable<Awaited<ReturnType<typeof login>>>
-    
-    export type LoginMutationError = unknown
-
-    export const useLogin = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{params: LoginParams}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof login>>,
-        TError,
-        {params: LoginParams},
-        TContext
-      > => {
-
-      const mutationOptions = getLoginMutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    
+  return useMutation(mutationOptions, queryClient);
+};

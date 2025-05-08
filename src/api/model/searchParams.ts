@@ -4,11 +4,15 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
+import type { SearchExperience } from "./searchExperience";
 
 export type SearchParams = {
-text: string;
-area: string;
-page: number;
-perPage: number;
-providers?: string[];
+  text: string;
+  area: string;
+  page: number;
+  perPage: number;
+  providers?: string[];
+  salaryFrom?: number;
+  salaryTo?: number;
+  experience?: SearchExperience;
 };

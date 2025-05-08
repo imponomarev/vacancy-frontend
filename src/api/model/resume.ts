@@ -4,7 +4,7 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import type { ExperienceEntry } from './experienceEntry';
+import type { ExperienceEntry } from "./experienceEntry";
 
 export interface Resume {
   source?: string;

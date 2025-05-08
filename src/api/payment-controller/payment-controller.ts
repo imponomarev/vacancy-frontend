@@ -4,75 +4,78 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import {
-  useMutation
-} from '@tanstack/react-query';
+import { useMutation } from "@tanstack/react-query";
 import type {
   MutationFunction,
   QueryClient,
   UseMutationOptions,
-  UseMutationResult
-} from '@tanstack/react-query';
+  UseMutationResult,
+} from "@tanstack/react-query";
 
-import { axiosFetcher } from '../../lib/axios-fetcher';
+import { axiosFetcher } from "../../lib/axios-fetcher";
 
+export const buyPro = (signal?: AbortSignal) => {
+  return axiosFetcher<string>({ url: `/payments/pro`, method: "POST", signal });
+};
 
+export const getBuyProMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof buyPro>>,
+    TError,
+    void,
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof buyPro>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["buyPro"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof buyPro>>,
+    void
+  > = () => {
+    return buyPro();
+  };
 
-export const buyPro = (
-    
- signal?: AbortSignal
-) => {
-      
-      
-      return axiosFetcher<string>(
-      {url: `/payments/pro`, method: 'POST', signal
-    },
-      );
-    }
-  
+  return { mutationFn, ...mutationOptions };
+};
 
+export type BuyProMutationResult = NonNullable<
+  Awaited<ReturnType<typeof buyPro>>
+>;
 
-export const getBuyProMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof buyPro>>, TError,void, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof buyPro>>, TError,void, TContext> => {
+export type BuyProMutationError = unknown;
 
-const mutationKey = ['buyPro'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+export const useBuyPro = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof buyPro>>,
+      TError,
+      void,
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof buyPro>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationOptions = getBuyProMutationOptions(options);
 
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof buyPro>>, void> = () => {
-          
-
-          return  buyPro()
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type BuyProMutationResult = NonNullable<Awaited<ReturnType<typeof buyPro>>>
-    
-    export type BuyProMutationError = unknown
-
-    export const useBuyPro = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof buyPro>>, TError,void, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof buyPro>>,
-        TError,
-        void,
-        TContext
-      > => {
-
-      const mutationOptions = getBuyProMutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    
+  return useMutation(mutationOptions, queryClient);
+};

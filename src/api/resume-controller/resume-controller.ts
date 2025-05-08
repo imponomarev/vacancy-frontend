@@ -4,9 +4,7 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import {
-  useQuery
-} from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -16,98 +14,138 @@ import type {
   QueryKey,
   UndefinedInitialDataOptions,
   UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+  UseQueryResult,
+} from "@tanstack/react-query";
 
-import type {
-  Resume,
-  Search1Params
-} from '.././model';
+import type { Resume, Search1Params } from ".././model";
 
-import { axiosFetcher } from '../../lib/axios-fetcher';
+import { axiosFetcher } from "../../lib/axios-fetcher";
 
+export const search1 = (params: Search1Params, signal?: AbortSignal) => {
+  return axiosFetcher<Resume[]>({
+    url: `/resumes`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
 
+export const getSearch1QueryKey = (params: Search1Params) => {
+  return [`/resumes`, ...(params ? [params] : [])] as const;
+};
 
-
-export const search1 = (
-    params: Search1Params,
- signal?: AbortSignal
+export const getSearch1QueryOptions = <
+  TData = Awaited<ReturnType<typeof search1>>,
+  TError = unknown,
+>(
+  params: Search1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof search1>>, TError, TData>
+    >;
+  },
 ) => {
-      
-      
-      return axiosFetcher<Resume[]>(
-      {url: `/resumes`, method: 'GET',
-        params, signal
-    },
-      );
-    }
-  
+  const { query: queryOptions } = options ?? {};
 
-export const getSearch1QueryKey = (params: Search1Params,) => {
-    return [`/resumes`, ...(params ? [params]: [])] as const;
-    }
+  const queryKey = queryOptions?.queryKey ?? getSearch1QueryKey(params);
 
-    
-export const getSearch1QueryOptions = <TData = Awaited<ReturnType<typeof search1>>, TError = unknown>(params: Search1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof search1>>, TError, TData>>, }
-) => {
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof search1>>> = ({
+    signal,
+  }) => search1(params, signal);
 
-const {query: queryOptions} = options ?? {};
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof search1>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-  const queryKey =  queryOptions?.queryKey ?? getSearch1QueryKey(params);
+export type Search1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof search1>>
+>;
+export type Search1QueryError = unknown;
 
-  
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof search1>>> = ({ signal }) => search1(params, signal);
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof search1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type Search1QueryResult = NonNullable<Awaited<ReturnType<typeof search1>>>
-export type Search1QueryError = unknown
-
-
-export function useSearch1<TData = Awaited<ReturnType<typeof search1>>, TError = unknown>(
- params: Search1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof search1>>, TError, TData>> & Pick<
+export function useSearch1<
+  TData = Awaited<ReturnType<typeof search1>>,
+  TError = unknown,
+>(
+  params: Search1Params,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof search1>>, TError, TData>
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof search1>>,
           TError,
           Awaited<ReturnType<typeof search1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSearch1<TData = Awaited<ReturnType<typeof search1>>, TError = unknown>(
- params: Search1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof search1>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useSearch1<
+  TData = Awaited<ReturnType<typeof search1>>,
+  TError = unknown,
+>(
+  params: Search1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof search1>>, TError, TData>
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof search1>>,
           TError,
           Awaited<ReturnType<typeof search1>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSearch1<TData = Awaited<ReturnType<typeof search1>>, TError = unknown>(
- params: Search1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof search1>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useSearch1<
+  TData = Awaited<ReturnType<typeof search1>>,
+  TError = unknown,
+>(
+  params: Search1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof search1>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-export function useSearch1<TData = Awaited<ReturnType<typeof search1>>, TError = unknown>(
- params: Search1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof search1>>, TError, TData>>, }
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useSearch1<
+  TData = Awaited<ReturnType<typeof search1>>,
+  TError = unknown,
+>(
+  params: Search1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof search1>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getSearch1QueryOptions(params, options);
 
-  const queryOptions = getSearch1QueryOptions(params,options)
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey ;
+  query.queryKey = queryOptions.queryKey;
 
   return query;
 }
-
-
-

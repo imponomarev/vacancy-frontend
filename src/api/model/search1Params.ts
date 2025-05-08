@@ -6,9 +6,9 @@
  */
 
 export type Search1Params = {
-text: string;
-area: string;
-page: number;
-perPage: number;
-providers?: string[];
+  text: string;
+  area: string;
+  page: number;
+  perPage: number;
+  providers?: string[];
 };

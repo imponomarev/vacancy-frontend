@@ -4,77 +4,86 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import {
-  useMutation
-} from '@tanstack/react-query';
+import { useMutation } from "@tanstack/react-query";
 import type {
   MutationFunction,
   QueryClient,
   UseMutationOptions,
-  UseMutationResult
-} from '@tanstack/react-query';
+  UseMutationResult,
+} from "@tanstack/react-query";
 
-import { axiosFetcher } from '../../lib/axios-fetcher';
+import { axiosFetcher } from "../../lib/axios-fetcher";
 
+export const handle = (handleBody: string, signal?: AbortSignal) => {
+  return axiosFetcher<string>({
+    url: `/yookassa/webhook`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: handleBody,
+    signal,
+  });
+};
 
+export const getHandleMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof handle>>,
+    TError,
+    { data: string },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof handle>>,
+  TError,
+  { data: string },
+  TContext
+> => {
+  const mutationKey = ["handle"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof handle>>,
+    { data: string }
+  > = (props) => {
+    const { data } = props ?? {};
 
-export const handle = (
-    handleBody: string,
- signal?: AbortSignal
-) => {
-      
-      
-      return axiosFetcher<string>(
-      {url: `/yookassa/webhook`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: handleBody, signal
-    },
-      );
-    }
-  
+    return handle(data);
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
-export const getHandleMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof handle>>, TError,{data: string}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof handle>>, TError,{data: string}, TContext> => {
+export type HandleMutationResult = NonNullable<
+  Awaited<ReturnType<typeof handle>>
+>;
+export type HandleMutationBody = string;
+export type HandleMutationError = unknown;
 
-const mutationKey = ['handle'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+export const useHandle = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof handle>>,
+      TError,
+      { data: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof handle>>,
+  TError,
+  { data: string },
+  TContext
+> => {
+  const mutationOptions = getHandleMutationOptions(options);
 
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof handle>>, {data: string}> = (props) => {
-          const {data} = props ?? {};
-
-          return  handle(data,)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type HandleMutationResult = NonNullable<Awaited<ReturnType<typeof handle>>>
-    export type HandleMutationBody = string
-    export type HandleMutationError = unknown
-
-    export const useHandle = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof handle>>, TError,{data: string}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof handle>>,
-        TError,
-        {data: string},
-        TContext
-      > => {
-
-      const mutationOptions = getHandleMutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    
+  return useMutation(mutationOptions, queryClient);
+};

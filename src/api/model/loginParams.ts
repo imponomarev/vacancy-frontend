@@ -6,6 +6,6 @@
  */
 
 export type LoginParams = {
-email: string;
-pwd: string;
+  email: string;
+  pwd: string;
 };
