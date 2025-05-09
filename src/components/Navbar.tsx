@@ -10,45 +10,64 @@ export default function Navbar() {
     const pathname = usePathname();
     const router = useRouter();
 
-    /** активная ссылка выделяется цветом и подчёркиванием */
-    const navLink = (href: string, label: string, extra?: any) => (
-        <Link
-            href={href}
-            {...extra}
-            className={
-                "px-2 py-1 " +
-                (pathname.startsWith(href)
-                    ? "text-primary font-semibold border-b-2 border-primary"
-                    : "text-slate-700 dark:text-slate-200 hover:text-primary/80")
-            }
-        >
-            {label}
-        </Link>
-    );
+    const navLink = (href: string, label: string, extra?: any) => {
+        const isActive = pathname.startsWith(href);
+        return (
+            <Link
+                href={href}
+                {...extra}
+                className={`
+          px-3 py-1 rounded-md
+          ${isActive
+                    ? "text-[var(--primary)] font-semibold border-b-2 border-[var(--primary)]"
+                    : "text-[var(--muted-700)] hover:text-[var(--primary-light)]"}
+          transition
+        `}
+            >
+                {label}
+            </Link>
+        );
+    };
 
     return (
-        <header className="sticky top-0 z-30 backdrop-blur bg-white/70 dark:bg-slate-800/70 shadow px-4 py-2 flex items-center gap-4">
-            <Link href="/vacancies" className="font-bold text-xl tracking-tight text-primary">
+        <header className="sticky top-0 z-30 backdrop-blur bg-[var(--bg)]/70 dark:bg-[var(--bg)]/70 shadow-md px-6 py-3 flex items-center">
+            <Link
+                href="/vacancies"
+                className="font-bold text-2xl tracking-tight text-[var(--primary)]"
+            >
                 VacAgg
             </Link>
 
-            {navLink("/vacancies", "Вакансии")}
-            {navLink(
-                "/resumes",
-                "Резюме",
-                status === "authenticated" && session?.user.role === "FREE"
-                    ? { onClick: (e: React.MouseEvent) => (e.preventDefault(), router.push("/billing/pro")) }
-                    : {},
-            )}
-            {status === "authenticated" && navLink("/dashboard/favourites", "Избранное")}
+            <nav className="ml-8 flex gap-4">
+                {navLink("/vacancies", "Вакансии")}
+                {navLink(
+                    "/resumes",
+                    "Резюме",
+                    status === "authenticated" && session?.user.role === "FREE"
+                        ? {
+                            onClick: (e: React.MouseEvent) => {
+                                e.preventDefault();
+                                router.push("/billing/pro");
+                            },
+                        }
+                        : {}
+                )}
+                {status === "authenticated" && navLink("/dashboard/favourites", "Избранное")}
+            </nav>
 
-            <div className="ml-auto flex items-center gap-3">
-                {status === "unauthenticated" && pathname !== "/login" && pathname !== "/register" && (
+            <div className="ml-auto flex items-center gap-4">
+                {status === "unauthenticated" && !["/login", "/register"].includes(pathname) && (
                     <>
-                        <Link href="/login" className="text-sm hover:text-primary/80">
+                        <Link
+                            href="/login"
+                            className="text-sm text-[var(--muted-700)] hover:text-[var(--primary-light)]"
+                        >
                             Вход
                         </Link>
-                        <Link href="/register" className="text-sm hover:text-primary/80">
+                        <Link
+                            href="/register"
+                            className="text-sm text-[var(--muted-700)] hover:text-[var(--primary-light)]"
+                        >
                             Регистрация
                         </Link>
                     </>
@@ -57,9 +76,15 @@ export default function Navbar() {
                 {status === "authenticated" && (
                     <Button
                         size="sm"
-                        variant="ghost"
+                        variant="outline"
+                        className={`
+              text-sm
+              border border-[var(--danger)]
+              text-[var(--danger)]
+              hover:bg-[var(--danger)]/10
+              transition
+            `}
                         onClick={() => signOut({ callbackUrl: "/login" })}
-                        className="text-sm"
                     >
                         Выйти
                     </Button>

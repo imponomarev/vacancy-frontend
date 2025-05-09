@@ -23,14 +23,13 @@ const base = z.object({ text: z.string().min(2), area: z.string().min(2) });
 
 export default function VacancySearchBar() {
     const router = useRouter();
-
-    const [text, setText]       = useState("");
-    const [area, setArea]       = useState("");
-    const [prov, setProv]       = useState<string[]>([]);
-    const [salaryFrom, setSF]   = useState("");
-    const [salaryTo,   setST]   = useState("");
-    const [experience, setExp]  = useState<ExpType | "">("");
-    const [err, setErr]         = useState<string | null>(null);
+    const [text, setText] = useState("");
+    const [area, setArea] = useState("");
+    const [prov, setProv] = useState<string[]>([]);
+    const [salaryFrom, setSF] = useState("");
+    const [salaryTo, setST] = useState("");
+    const [experience, setExp] = useState<ExpType | "">("");
+    const [err, setErr] = useState<string | null>(null);
 
     useEffect(() => setErr(null), [text, area, salaryFrom, salaryTo, experience, prov]);
 
@@ -51,84 +50,104 @@ export default function VacancySearchBar() {
         });
         prov.forEach((p) => q.append("providers", p));
         if (salaryFrom) q.set("salaryFrom", salaryFrom);
-        if (salaryTo)   q.set("salaryTo",   salaryTo);
+        if (salaryTo)   q.set("salaryTo", salaryTo);
         if (experience) q.set("experience", experience);
-
         router.push(`/vacancies?${q.toString()}`);
     };
 
+    const inputWrapper = `
+    w-full
+    border border-[var(--muted-300)] dark:border-[var(--muted-600)]
+    rounded-md
+    focus-within:ring-1 focus-within:ring-[var(--primary)] focus-within:border-[var(--primary)]
+    transition
+  `.trim();
+
+    const inputInner = `
+    w-full bg-transparent px-3 py-2 outline-none
+  `.trim();
+
     return (
-        <div className="rounded-lg bg-white/90 dark:bg-slate-800/80 shadow-md p-6">
+        <div className="rounded-lg bg-[var(--muted-100)] dark:bg-[var(--muted-800)] shadow-md p-6">
             <form onSubmit={submit} className="space-y-6">
-                {/* ─────────────── GRID ─────────────── */}
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                    {/* INPUT-поля */}
                     {[
-                        { lbl: "Ключевые слова", val: text,   set: setText },
-                        { lbl: "Город",          val: area,   set: setArea },
+                        { lbl: "Ключевые слова", val: text, set: setText },
+                        { lbl: "Город",          val: area, set: setArea },
                         { lbl: "Зарплата от",    val: salaryFrom, set: setSF, type: "number" },
                         { lbl: "Зарплата до",    val: salaryTo,   set: setST, type: "number" },
                     ].map(({ lbl, val, set, type }) => (
-                        <div key={lbl} className="flex flex-col gap-1 w-full">
+                        <div key={lbl} className="flex flex-col gap-1">
                             <label className="text-sm font-medium">{lbl}</label>
-                            <Input
-                                value={val}
-                                type={type as any}
-                                onChange={(e) => set(e.target.value)}
-                                className="w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-2 focus:ring-primary focus:border-primary"
-                            />
+                            <div className={inputWrapper}>
+                                <Input
+                                    variant="unstyled"
+                                    inputClassName={inputInner}
+                                    type={type as any}
+                                    value={val}
+                                    onChange={(e) => set(e.target.value)}
+                                    placeholder={lbl}
+                                />
+                            </div>
                         </div>
                     ))}
 
-                    {/* ПРОВАЙДЕРЫ */}
                     <fieldset className="flex flex-col justify-center lg:col-span-2">
                         <legend className="text-sm font-medium mb-2">Провайдеры</legend>
-                        <div className="flex flex-wrap gap-x-8 gap-y-3">
+                        <div className="flex flex-wrap gap-4">
                             {PROV.map((p) => (
-                                <label key={p.value} className="flex items-center gap-2 text-base">
+                                <label key={p.value} className="flex items-center gap-2">
                                     <input
                                         type="checkbox"
                                         checked={prov.includes(p.value)}
                                         onChange={(e) => toggleProv(p.value, e.target.checked)}
-                                        className="form-checkbox h-5 w-5 accent-primary"
+                                        className="form-checkbox h-5 w-5 accent-[var(--primary)]"
                                     />
-                                    {p.label}
+                                    <span className="text-[var(--fg)]">{p.label}</span>
                                 </label>
                             ))}
                         </div>
                     </fieldset>
 
-                    {/* ОПЫТ */}
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium">Опыт</label>
-                        <select
-                            value={experience}
-                            onChange={(e) => setExp(e.target.value as ExpType)}
-                            className="w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-2 bg-white dark:bg-slate-800"
-                        >
-                            <option value="">Не важно</option>
-                            {EXP.map((o) => (
-                                <option key={o.value} value={o.value}>
-                                    {o.label}
-                                </option>
-                            ))}
-                        </select>
+                        <div className={inputWrapper}>
+                            <select
+                                value={experience}
+                                onChange={(e) => setExp(e.target.value as ExpType)}
+                                className={`
+                  w-full bg-transparent px-3 py-2 outline-none
+                `}
+                            >
+                                <option value="">Не важно</option>
+                                {EXP.map((o) => (
+                                    <option key={o.value} value={o.value}>
+                                        {o.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
-                    {/* КНОПКА */}
                     <div className="flex items-end lg:justify-end">
                         <Button
                             type="submit"
                             size="lg"
-                            variant="outline"
-                            className="min-w-[10rem] text-base font-semibold"
+                            variant="solid"
+                            className="
+                bg-[var(--primary)] hover:bg-[var(--primary-light)]
+                text-white
+                rounded-md
+                px-6 py-2
+                transition
+              "
                         >
                             Искать вакансии
                         </Button>
                     </div>
                 </div>
 
-                {err && <p className="text-red-500 text-sm">{err}</p>}
+                {err && <p className="text-[var(--danger)] text-sm">{err}</p>}
             </form>
         </div>
     );

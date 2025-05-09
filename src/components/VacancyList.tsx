@@ -1,5 +1,4 @@
 "use client";
-
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@heroui/react";
@@ -9,44 +8,36 @@ import VacancyCard from "@/components/VacancyCard";
 
 export default function VacancyList() {
     const sp = useSearchParams();
+    const text = sp.get("text") || "";
+    const area = sp.get("area") || "";
+    const perPage = Number(sp.get("perPage") || "20");
+    const salaryFrom = sp.get("salaryFrom") || "";
+    const salaryTo = sp.get("salaryTo") || "";
+    const experience = sp.get("experience") || "";
+    const providers = sp.getAll("providers");
 
-    // 1) Читаем из URL параметры
-    const text          = sp.get("text")       || "";
-    const area          = sp.get("area")       || "";
-    const perPageStr    = sp.get("perPage")    || "20";
-    const salaryFromStr = sp.get("salaryFrom") || "";
-    const salaryToStr   = sp.get("salaryTo")   || "";
-    const experience    = sp.get("experience") || "";
-    const providers     = sp.getAll("providers"); // массив всех провайдеров
+    const [page, setPage] = useState(0);
+    const [items, setItems] = useState<any[]>([]);
+    const [queried, setQueried] = useState(false);
 
-    // Состояния страницы и накопленных элементов
-    const [page, setPage]             = useState(0);
-    const [items, setItems]           = useState<typeof vacancies>([]);
-    const [hasQueried, setHasQueried] = useState(false);
-
-    // Флаг «начало поиска»
-    const enabled = !!text.trim() && !!area.trim();
+    // устанавливаем флаг, что поиск начали
     useEffect(() => {
-        if (enabled) setHasQueried(true);
-    }, [enabled]);
+        if (text.trim() !== "" && area.trim() !== "") {
+            setQueried(true);
+        }
+    }, [text, area]);
 
-    // Сбрасываем страницу и очистка кэша при изменении любого фильтра
+    // сброс при изменении фильтров
     useEffect(() => {
         setPage(0);
         setItems([]);
-    }, [
-        text,
-        area,
-        perPageStr,
-        salaryFromStr,
-        salaryToStr,
-        experience,
-        providers.join(","), // одна зависимость вместо spread
-    ]);
+    }, [text, area, perPage, salaryFrom, salaryTo, experience, providers.join(",")]);
 
-    // Делаем запрос по текущим параметрам
+    // приводим enabled к булеву
+    const shouldEnable = text.trim().length > 0 && area.trim().length > 0;
+
     const {
-        data: vacancies = [],
+        data = [],
         isLoading,
         isError,
         error,
@@ -56,49 +47,54 @@ export default function VacancyList() {
             text,
             area,
             page,
-            perPage: Number(perPageStr),
+            perPage,
             providers: providers.length ? providers : undefined,
-            salaryFrom: salaryFromStr ? Number(salaryFromStr) : undefined,
-            salaryTo:   salaryToStr   ? Number(salaryToStr)   : undefined,
+            salaryFrom: salaryFrom ? Number(salaryFrom) : undefined,
+            salaryTo: salaryTo ? Number(salaryTo) : undefined,
             experience: experience || undefined,
         },
-        { query: { enabled, keepPreviousData: true } }
+        {
+            query: {
+                enabled: shouldEnable,       // <-- здесь boolean
+                keepPreviousData: true,
+            },
+        }
     );
 
-    // Накопление результатов постранично
+    // накапливаем страницы
     useEffect(() => {
-        if (!isLoading && enabled) {
-            if (page === 0) {
-                setItems(vacancies);
-            } else {
-                setItems(prev => [...prev, ...vacancies]);
-            }
+        if (!isLoading && queried) {
+            setItems(prev => (page === 0 ? data : [...prev, ...data]));
         }
-    }, [vacancies, isLoading, page, enabled]);
+    }, [data, isLoading, page, queried]);
 
-    // UI-станы
+    // состояния UI
     if (isLoading && page === 0) {
         return <Skeleton className="h-32 w-full" />;
     }
     if (isError) {
-        const msg = (error as any)?.response?.data?.message || "Ошибка загрузки вакансий";
-        return <p className="text-red-500 py-4 text-center">{msg}</p>;
+        return (
+            <p className="text-[var(--danger)] py-4 text-center">
+                {(error as any)?.response?.data?.message || "Ошибка загрузки вакансий"}
+            </p>
+        );
     }
-    if (hasQueried && !isFetching && items.length === 0) {
-        return <p className="text-center py-10 text-gray-500">Ничего не найдено</p>;
+    if (queried && !isFetching && items.length === 0) {
+        return (
+            <p className="text-center py-10 text-[var(--muted-500)]">
+                Ничего не найдено
+            </p>
+        );
     }
 
-    // Проверка, есть ли ещё страницы
-    const noMore = vacancies.length < Number(perPageStr);
+    const noMore = data.length < perPage;
 
     return (
         <>
             <div className="grid gap-4 mt-6">
-                {items.map((v, idx) => {
-                    // Гарантированно уникальный ключ:
-                    const key = `${v.externalId ?? ""}-${idx}`;
-                    return <VacancyCard v={v} key={key} />;
-                })}
+                {items.map((v, i) => (
+                    <VacancyCard v={v} key={`${v.externalId}-${i}`} />
+                ))}
             </div>
             {!noMore && (
                 <LoadMoreButton
