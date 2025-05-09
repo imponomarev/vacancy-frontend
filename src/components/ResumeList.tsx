@@ -11,19 +11,47 @@ import ResumeCard from "./ResumeCard";
 export default function ResumeList() {
     const { data: session, status } = useSession();
     const sp = useSearchParams();
-    const { text = "", area = "", perPage = "20" } = Object.fromEntries(
-        sp.entries()
-    ) as Record<string, string>;
 
-    const [page, setPage] = useState(0);
+    const text       = sp.get("text")       || "";
+    const area       = sp.get("area")       || "";
+    const perPageStr = sp.get("perPage")    || "20";
+    const salaryFrom = sp.get("salaryFrom") || "";
+    const salaryTo   = sp.get("salaryTo")   || "";
+    const ageFrom    = sp.get("ageFrom")    || "";
+    const ageTo      = sp.get("ageTo")      || "";
+    const experience = sp.get("experience") || "";
+    const schedule   = sp.get("schedule")   || "";
+    const education  = sp.get("education")  || "";
+    const providers  = sp.getAll("providers");
 
+    const [page, setPage]             = useState(0);
     const [hasQueried, setHasQueried] = useState(false);
-
     const isPro = session?.user.role === "PRO";
+    const enabled = isPro && text.trim() !== "" && area.trim() !== "";
 
-    const enabled = isPro && !!text.trim() && !!area.trim();
+    // помечаем, что первый запрос уже был
+    useEffect(() => {
+        if (enabled) setHasQueried(true);
+    }, [enabled]);
 
-    // хук вызываем всегда, но включаем запрос только для PRO
+    // сбрасываем страницу при изменении фильтров
+    useEffect(() => {
+        setPage(0);
+    }, [
+        text,
+        area,
+        perPageStr,
+        salaryFrom,
+        salaryTo,
+        ageFrom,
+        ageTo,
+        experience,
+        schedule,
+        education,
+        providers, // массив целиком
+    ]);
+
+    // сам запрос
     const {
         data: resumes = [],
         isLoading,
@@ -31,25 +59,34 @@ export default function ResumeList() {
         error,
         isFetching,
     } = useResumeSearch(
-        { text, area, page, perPage: Number(perPage) },
+        {
+            text,
+            area,
+            page,
+            perPage: Number(perPageStr),
+            providers: providers.length > 0 ? providers : undefined,
+            salaryFrom: salaryFrom ? Number(salaryFrom) : undefined,
+            salaryTo:   salaryTo   ? Number(salaryTo)   : undefined,
+            ageFrom:    ageFrom    ? Number(ageFrom)    : undefined,
+            ageTo:      ageTo      ? Number(ageTo)      : undefined,
+            experience: experience || undefined,
+            schedule:   schedule   || undefined,
+            education:  education  || undefined,
+        },
         {
             query: {
-                enabled: isPro && !!text && !!area,
+                enabled,
                 keepPreviousData: true,
             },
         }
     );
 
-    useEffect(() => {
-        if (enabled) setHasQueried(true);
-    }, [enabled]);
-
-    // 1) пока сессия грузится
+    // 1) пока грузится сессия
     if (status === "loading") {
         return <Skeleton className="h-32 w-full" />;
     }
 
-    // 2) если не PRO — показываем заглушку
+    // 2) если не PRO
     if (!isPro) {
         return (
             <p className="text-center py-10">
@@ -58,12 +95,7 @@ export default function ResumeList() {
         );
     }
 
-    // сбрасываем страницу при смене фильтров
-    useEffect(() => {
-        setPage(0);
-    }, [text, area]);
-
-    // 3) загрузка резюме
+    // 3) loading
     if (isLoading) {
         return <Skeleton className="h-32 w-full" />;
     }
@@ -71,16 +103,11 @@ export default function ResumeList() {
     // 4) ошибка
     if (isError) {
         const msg =
-            (error as any)?.response?.data?.message ||
-            "Ошибка загрузки резюме";
-        return (
-            <p className="text-red-500 py-4 text-center">
-                {msg}
-            </p>
-        );
+            (error as any)?.response?.data?.message || "Ошибка загрузки резюме";
+        return <p className="text-red-500 py-4 text-center">{msg}</p>;
     }
 
-    // 5) если нет результатов
+    // 5) ничего не найдено
     if (hasQueried && !isFetching && resumes.length === 0) {
         return (
             <p className="text-center py-10 text-gray-500">
@@ -89,9 +116,8 @@ export default function ResumeList() {
         );
     }
 
-    // 6) список и кнопка «Ещё»
-    const noMore = resumes.length < Number(perPage);
-
+    // 6) список + “Ещё”
+    const noMore = resumes.length < Number(perPageStr);
     return (
         <>
             <div className="grid gap-4 mt-6">
