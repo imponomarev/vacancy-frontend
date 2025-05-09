@@ -4,6 +4,9 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
+import type { Search1Experience } from "./search1Experience";
+import type { Search1Schedule } from "./search1Schedule";
+import type { Search1Education } from "./search1Education";
 
 export type Search1Params = {
   text: string;
@@ -11,4 +14,11 @@ export type Search1Params = {
   page: number;
   perPage: number;
   providers?: string[];
+  salaryFrom?: number;
+  salaryTo?: number;
+  ageFrom?: number;
+  ageTo?: number;
+  experience?: Search1Experience;
+  schedule?: Search1Schedule;
+  education?: Search1Education;
 };

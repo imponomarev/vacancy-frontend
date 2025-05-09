@@ -23,9 +23,6 @@ export default function SearchBar() {
     // Храним единое сообщение об ошибке
     const [error, setError] = useState<string | null>(null);
 
-    // Определяем цель формы
-    const target = pathname.includes("/resumes") ? "resumes" : "vacancies";
-
     // Очищаем поля и ошибки при каждом монтировании
     useEffect(() => {
         setText("");
@@ -45,13 +42,13 @@ export default function SearchBar() {
 
         setError(null);
 
-        // Перенаправляем на поиск
-        router.push(
-            `/${target}` +
-            `?text=${encodeURIComponent(text.trim())}` +
-            `&area=${encodeURIComponent(area.trim())}` +
-            `&page=0&perPage=20`
-        );
+        const params = new URLSearchParams({
+            text: text.trim(),
+            area: area.trim(),
+            page: "0",
+            perPage: "20",
+        });
+        router.push(`/resumes?${params.toString()}`);
     };
 
     return (

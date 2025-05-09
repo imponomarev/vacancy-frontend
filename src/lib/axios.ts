@@ -1,10 +1,15 @@
 import axios from "axios";
-import { getServerSession } from "next-auth/next";
-import { getSession } from "next-auth/react";
-import { authOptions } from "@/lib/auth";
+import qs from "qs";
+import {getServerSession} from "next-auth/next";
+import {getSession} from "next-auth/react";
+import {authOptions} from "@/lib/auth";
 
 export const apiClient = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
+    paramsSerializer: {
+        serialize: (params) =>
+            qs.stringify(params, {arrayFormat: "repeat", encode: true}),
+    },
 });
 
 apiClient.interceptors.request.use(async (config) => {

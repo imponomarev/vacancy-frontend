@@ -388,6 +388,88 @@
                 "type": "string"
               }
             }
+          },
+          {
+            "name": "salaryFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "salaryTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "ageFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "ageTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "experience",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "NO_EXPERIENCE",
+                "BETWEEN_1_AND_3_YEARS",
+                "BETWEEN_3_AND_6_YEARS",
+                "MORE_THAN_6_YEARS"
+              ]
+            }
+          },
+          {
+            "name": "schedule",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "FULL_DAY",
+                "SHIFT",
+                "FLEXIBLE",
+                "REMOTE",
+                "FLY_IN_FLY_OUT",
+                "PARTIAL_DAY"
+              ]
+            }
+          },
+          {
+            "name": "education",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SECONDARY",
+                "SPECIAL_SECONDARY",
+                "UNFINISHED_HIGHER",
+                "HIGHER",
+                "BACHELOR",
+                "MASTER"
+              ]
+            }
           }
         ],
         "responses": {
