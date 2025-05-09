@@ -13,7 +13,7 @@ export default function VacancyCard({v}: { v: Vacancy }) {
     );
 
     return (
-        <Card className="p-4 relative hover:shadow-lg transition">
+        <Card className="p-4 relative hover:shadow-lg hover:ring-1 hover:ring-primary transition">
             {/* кнопка лайка */}
             <button
                 className="absolute top-3 right-3"

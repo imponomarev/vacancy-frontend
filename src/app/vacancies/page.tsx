@@ -1,11 +1,12 @@
 import VacancyList from "@/components/VacancyList";
 import VacancySearchBar from "@/components/VacancySearchBar";
+import PageSection from "@/components/PageSection";
 
 export default function VacanciesPage() {
     return (
-        <section className="container mx-auto py-6 px-4">
-            <VacancySearchBar />
-            <VacancyList />
-        </section>
+        <PageSection>
+            <VacancySearchBar/>
+            <VacancyList/>
+        </PageSection>
     );
 }

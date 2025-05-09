@@ -32,3 +32,8 @@ body {
 html {
     scroll-behavior: smooth;
 }
+
+input:focus {
+    outline: none;      /* удаляет нативную обводку браузера */
+    box-shadow: none;   /* убирает возможные тени */
+}

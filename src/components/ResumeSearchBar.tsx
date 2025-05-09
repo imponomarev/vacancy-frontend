@@ -1,250 +1,177 @@
 "use client";
 
-import {useRouter} from "next/navigation";
-import {Input, Button} from "@heroui/react";
-import {useState, useEffect} from "react";
-import {z} from "zod";
-
+import { useRouter } from "next/navigation";
+import { Input, Button } from "@heroui/react";
+import { useState, useEffect } from "react";
+import { z } from "zod";
 import {
-    Search1Experience as ResumeExperienceEnum,
-    Search1Schedule as ResumeScheduleEnum,
-    Search1Education as ResumeEducationEnum,
+    Search1Experience as ExpEnum,
+    Search1Schedule   as SchEnum,
+    Search1Education  as EduEnum,
 } from "@/api/model";
 
-type ExperienceType = keyof typeof ResumeExperienceEnum;
-type ScheduleType = keyof typeof ResumeScheduleEnum;
-type EducationType = keyof typeof ResumeEducationEnum;
+type Exp = keyof typeof ExpEnum;
+type Sch = keyof typeof SchEnum;
+type Edu = keyof typeof EduEnum;
 
-const schema = z
-    .object({
-        text: z.string().min(2, "Введите хотя бы 2 символа для ключевых слов"),
-        area: z.string().min(2, "Укажите город"),
-        providers: z.array(z.enum(["hh", "sj", "avito"])).optional().default([]),
-        salaryFrom: z
-            .string()
-            .optional()
-            .transform((v) => (v?.trim() ? Number(v) : undefined))
-            .refine((v) => v === undefined || v >= 0, "Нижняя граница зарплаты ≥ 0")
-            .optional(),
-        salaryTo: z
-            .string()
-            .optional()
-            .transform((v) => (v?.trim() ? Number(v) : undefined))
-            .refine((v) => v === undefined || v >= 0, "Верхняя граница зарплаты ≥ 0")
-            .optional(),
-        ageFrom: z
-            .string()
-            .optional()
-            .transform((v) => (v?.trim() ? Number(v) : undefined))
-            .refine((v) => v === undefined || v >= 0, "Возраст от ≥ 0")
-            .optional(),
-        ageTo: z
-            .string()
-            .optional()
-            .transform((v) => (v?.trim() ? Number(v) : undefined))
-            .refine((v) => v === undefined || v >= 0, "Возраст до ≥ 0")
-            .optional(),
-        experience: z.nativeEnum(ResumeExperienceEnum).optional(),
-        schedule: z.nativeEnum(ResumeScheduleEnum).optional(),
-        education: z.nativeEnum(ResumeEducationEnum).optional(),
-    })
-
-const PROVIDER_OPTIONS = [
-    {label: "HH", value: "hh"},
-    {label: "SuperJob", value: "sj"},
-    {label: "Avito", value: "avito"},
+const EXP = [
+    { label: "Без опыта",   value: "NO_EXPERIENCE" },
+    { label: "1–3 года",    value: "BETWEEN_1_AND_3_YEARS" },
+    { label: "3–6 лет",     value: "BETWEEN_3_AND_6_YEARS" },
+    { label: "Более 6 лет", value: "MORE_THAN_6_YEARS" },
+];
+const SCH = [
+    { label: "Полный день",        value: "FULL_DAY" },
+    { label: "Сменный график",     value: "SHIFT" },
+    { label: "Гибкий график",      value: "FLEXIBLE" },
+    { label: "Удалённая работа",   value: "REMOTE" },
+    { label: "Вахтовый метод",     value: "FLY_IN_FLY_OUT" },
+    { label: "Частичная занятость",value: "PARTIAL_DAY" },
+];
+const EDU = [
+    { label: "Среднее",         value: "SECONDARY" },
+    { label: "Сред. спец.",     value: "SPECIAL_SECONDARY" },
+    { label: "Неполное высшее", value: "UNFINISHED_HIGHER" },
+    { label: "Высшее",          value: "HIGHER" },
+    { label: "Бакалавр",        value: "BACHELOR" },
+    { label: "Магистр",         value: "MASTER" },
+];
+const PROV = [
+    { label: "hh",       value: "hh" },
+    { label: "SuperJob", value: "sj" },
+    { label: "Avito",    value: "avito" },
 ];
 
-const EXPERIENCE_OPTIONS: { label: string; value: ExperienceType }[] = [
-    {label: "Без опыта", value: "NO_EXPERIENCE"},
-    {label: "1–3 года", value: "BETWEEN_1_AND_3_YEARS"},
-    {label: "3–6 лет", value: "BETWEEN_3_AND_6_YEARS"},
-    {label: "Более 6 лет", value: "MORE_THAN_6_YEARS"},
-];
-
-const SCHEDULE_OPTIONS: { label: string; value: ScheduleType }[] = [
-    {label: "Полный день", value: "FULL_DAY"},
-    {label: "Сменный график", value: "SHIFT"},
-    {label: "Гибкий график", value: "FLEXIBLE"},
-    {label: "Удалённая работа", value: "REMOTE"},
-    {label: "Вахтовый метод", value: "FLY_IN_FLY_OUT"},
-    {label: "Частичная занятость", value: "PARTIAL_DAY"},
-];
-
-const EDUCATION_OPTIONS: { label: string; value: EducationType }[] = [
-    {label: "Среднее", value: "SECONDARY"},
-    {label: "Среднее специальное", value: "SPECIAL_SECONDARY"},
-    {label: "Неполное высшее", value: "UNFINISHED_HIGHER"},
-    {label: "Высшее", value: "HIGHER"},
-    {label: "Бакалавр", value: "BACHELOR"},
-    {label: "Магистр", value: "MASTER"},
-];
+const base = z.object({ text: z.string().min(2), area: z.string().min(2) });
 
 export default function ResumeSearchBar() {
     const router = useRouter();
 
-    const [text, setText] = useState("");
-    const [area, setArea] = useState("");
-    const [providers, setProviders] = useState<string[]>([]);
-    const [salaryFrom, setSalaryFrom] = useState("");
-    const [salaryTo, setSalaryTo] = useState("");
-    const [ageFrom, setAgeFrom] = useState("");
-    const [ageTo, setAgeTo] = useState("");
-    const [experience, setExperience] = useState<ExperienceType | "">("");
-    const [schedule, setSchedule] = useState<ScheduleType | "">("");
-    const [education, setEducation] = useState<EducationType | "">("");
-    const [error, setError] = useState<string | null>(null);
+    const [text, setText]     = useState("");
+    const [area, setArea]     = useState("");
+    const [prov, setProv]     = useState<string[]>([]);
+    const [salaryFrom, setSF] = useState("");
+    const [salaryTo, setST]   = useState("");
+    const [ageFrom, setAF]    = useState("");
+    const [ageTo, setAT]      = useState("");
+    const [exp, setExp]       = useState<Exp  | "">("");
+    const [sch, setSch]       = useState<Sch  | "">("");
+    const [edu, setEdu]       = useState<Edu  | "">("");
+    const [err, setErr]       = useState<string | null>(null);
 
-    // Сбрасываем ошибку при любом изменении полей
-    useEffect(() => {
-        if (error) setError(null);
-    }, [
-        text, area, providers,
-        salaryFrom, salaryTo,
-        ageFrom, ageTo,
-        experience, schedule, education
-    ]);
+    useEffect(
+        () => setErr(null),
+        [text, area, prov, salaryFrom, salaryTo, ageFrom, ageTo, exp, sch, edu],
+    );
 
-    const toggleProvider = (val: string, checked: boolean) => {
-        setProviders(prev =>
-            checked ? [...prev, val] : prev.filter(p => p !== val)
-        );
-    };
+    const toggleProv = (v: string, on: boolean) =>
+        setProv((p) => (on ? [...p, v] : p.filter((x) => x !== v)));
 
-    const onSubmit = (e: React.FormEvent) => {
+    const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        const parsed = schema.safeParse({
-            text: text.trim(),
-            area: area.trim(),
-            providers,
-            salaryFrom,
-            salaryTo,
-            ageFrom,
-            ageTo,
-            experience: experience || undefined,
-            schedule: schedule || undefined,
-            education: education || undefined,
-        });
-        if (!parsed.success) {
-            setError(parsed.error.issues[0].message);
+        if (!base.safeParse({ text, area }).success) {
+            setErr("Заполните «Ключевые слова» и «Город» (≥ 2 симв.)");
             return;
         }
-
-        const params = new URLSearchParams({
+        const q = new URLSearchParams({
             text: text.trim(),
             area: area.trim(),
             page: "0",
             perPage: "20",
         });
-        providers.forEach(p => params.append("providers", p));
-        if (salaryFrom) params.set("salaryFrom", salaryFrom);
-        if (salaryTo) params.set("salaryTo", salaryTo);
-        if (ageFrom) params.set("ageFrom", ageFrom);
-        if (ageTo) params.set("ageTo", ageTo);
-        if (experience) params.set("experience", experience);
-        if (schedule) params.set("schedule", schedule);
-        if (education) params.set("education", education);
+        prov.forEach((p) => q.append("providers", p));
+        if (salaryFrom) q.set("salaryFrom", salaryFrom);
+        if (salaryTo)   q.set("salaryTo",   salaryTo);
+        if (ageFrom)    q.set("ageFrom",    ageFrom);
+        if (ageTo)      q.set("ageTo",      ageTo);
+        if (exp)  q.set("experience", exp);
+        if (sch)  q.set("schedule",   sch);
+        if (edu)  q.set("education",  edu);
 
-        setError(null);
-        router.push(`/resumes?${params.toString()}`);
+        router.push(`/resumes?${q.toString()}`);
     };
 
     return (
-        <form onSubmit={onSubmit} className="flex flex-col gap-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Input
-                    placeholder="Ключевые слова"
-                    value={text}
-                    onChange={e => setText(e.target.value)}
-                />
-                <Input
-                    placeholder="Город"
-                    value={area}
-                    onChange={e => setArea(e.target.value)}
-                />
+        <div className="rounded-lg bg-white/90 dark:bg-slate-800/80 shadow-md p-6">
+            <form onSubmit={submit} className="space-y-6">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
 
-                {/* Провайдеры */}
-                <fieldset className="space-y-1">
-                    <legend className="font-medium">Провайдеры</legend>
-                    {PROVIDER_OPTIONS.map(opt => (
-                        <label key={opt.value} className="inline-flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                className="form-checkbox"
-                                checked={providers.includes(opt.value)}
-                                onChange={e => toggleProvider(opt.value, e.target.checked)}
+                    {/* INPUT-поля */}
+                    {[
+                        { l: "Ключевые слова", v: text,      set: setText },
+                        { l: "Город",          v: area,      set: setArea },
+                        { l: "Зарплата от",    v: salaryFrom,set: setSF, type:"number" },
+                        { l: "Зарплата до",    v: salaryTo,  set: setST, type:"number" },
+                        { l: "Возраст от",     v: ageFrom,   set: setAF, type:"number" },
+                        { l: "Возраст до",     v: ageTo,     set: setAT, type:"number" },
+                    ].map(({ l, v, set, type }) => (
+                        <div key={l} className="flex flex-col gap-1">
+                            <label className="text-sm font-medium">{l}</label>
+                            <Input
+                                value={v}
+                                type={type as any}
+                                onChange={(e) => set(e.target.value)}
+                                className="w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-2 focus:ring-primary focus:border-primary"
                             />
-                            {opt.label}
-                        </label>
+                        </div>
                     ))}
-                </fieldset>
 
-                <Input
-                    placeholder="Зарплата от"
-                    type="number"
-                    value={salaryFrom}
-                    onChange={e => setSalaryFrom(e.target.value)}
-                />
-                <Input
-                    placeholder="Зарплата до"
-                    type="number"
-                    value={salaryTo}
-                    onChange={e => setSalaryTo(e.target.value)}
-                />
-                <Input
-                    placeholder="Возраст от"
-                    type="number"
-                    value={ageFrom}
-                    onChange={e => setAgeFrom(e.target.value)}
-                />
-                <Input
-                    placeholder="Возраст до"
-                    type="number"
-                    value={ageTo}
-                    onChange={e => setAgeTo(e.target.value)}
-                />
+                    {/* ПРОВАЙДЕРЫ */}
+                    <fieldset className="flex flex-col justify-center lg:col-span-2">
+                        <legend className="text-sm font-medium mb-2">Провайдеры</legend>
+                        <div className="flex flex-wrap gap-x-8 gap-y-3">
+                            {PROV.map((p) => (
+                                <label key={p.value} className="flex items-center gap-2 text-base">
+                                    <input
+                                        type="checkbox"
+                                        checked={prov.includes(p.value)}
+                                        onChange={(e) => toggleProv(p.value, e.target.checked)}
+                                        className="form-checkbox h-5 w-5 accent-primary"
+                                    />
+                                    {p.label}
+                                </label>
+                            ))}
+                        </div>
+                    </fieldset>
 
-                <select
-                    value={experience}
-                    onChange={e => setExperience(e.target.value as ExperienceType)}
-                    className="p-2 border rounded"
-                >
-                    <option value="">Опыт</option>
-                    {EXPERIENCE_OPTIONS.map(o => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
+                    {/* SELECT-поля */}
+                    {[
+                        { l: "Опыт",       v: exp, set: setExp, opts: EXP },
+                        { l: "График",     v: sch, set: setSch, opts: SCH },
+                        { l: "Образование",v: edu, set: setEdu, opts: EDU },
+                    ].map(({ l, v, set, opts }) => (
+                        <div key={l} className="flex flex-col gap-1">
+                            <label className="text-sm font-medium">{l}</label>
+                            <select
+                                value={v}
+                                onChange={(e) => set(e.target.value as any)}
+                                className="w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-2 bg-white dark:bg-slate-800"
+                            >
+                                <option value="">Не важно</option>
+                                {opts.map((o) => (
+                                    <option key={o.value} value={o.value}>
+                                        {o.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     ))}
-                </select>
 
-                <select
-                    value={schedule}
-                    onChange={e => setSchedule(e.target.value as ScheduleType)}
-                    className="p-2 border rounded"
-                >
-                    <option value="">График</option>
-                    {SCHEDULE_OPTIONS.map(o => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                </select>
+                    {/* КНОПКА */}
+                    <div className="flex items-end lg:justify-end">
+                        <Button
+                            type="submit"
+                            size="lg"
+                            variant="outline"
+                            className="min-w-[10rem] text-base font-semibold"
+                        >
+                            Искать резюме
+                        </Button>
+                    </div>
+                </div>
 
-                <select
-                    value={education}
-                    onChange={e => setEducation(e.target.value as EducationType)}
-                    className="p-2 border rounded"
-                >
-                    <option value="">Образование</option>
-                    {EDUCATION_OPTIONS.map(o => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                </select>
-            </div>
-
-            {error && (
-                <p className="text-red-500 text-sm text-center">{error}</p>
-            )}
-
-            <div className="text-right">
-                <Button type="submit">Искать резюме</Button>
-            </div>
-        </form>
+                {err && <p className="text-red-500 text-sm">{err}</p>}
+            </form>
+        </div>
     );
 }

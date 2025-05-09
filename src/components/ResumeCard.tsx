@@ -13,7 +13,7 @@ export default function ResumeCard({r}: { r: Resume }) {
     );
 
     return (
-        <Card className="p-4 relative hover:shadow-lg transition">
+        <Card className="p-4 relative hover:shadow-lg hover:ring-1 hover:ring-primary transition">
             {/* лайк */}
             <button
                 className="absolute top-3 right-3"
