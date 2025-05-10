@@ -1,10 +1,11 @@
 "use client";
+
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Skeleton } from "@heroui/react";
 import { useSearch as useVacancySearch } from "@/api/vacancy-controller/vacancy-controller";
 import LoadMoreButton from "./LoadMoreButton";
 import VacancyCard from "@/components/VacancyCard";
+import { LottieLoader } from "@/components/LottieLoader";
 
 export default function VacancyList() {
     const sp = useSearchParams();
@@ -20,22 +21,25 @@ export default function VacancyList() {
     const [items, setItems] = useState<any[]>([]);
     const [queried, setQueried] = useState(false);
 
-    // устанавливаем флаг, что поиск начали
-    useEffect(() => {
-        if (text.trim() !== "" && area.trim() !== "") {
-            setQueried(true);
-        }
-    }, [text, area]);
+    const shouldEnable = text.trim().length > 0 && area.trim().length > 0;
 
-    // сброс при изменении фильтров
+    // Сбрасываем всё при изменении фильтров
     useEffect(() => {
         setPage(0);
         setItems([]);
-    }, [text, area, perPage, salaryFrom, salaryTo, experience, providers.join(",")]);
+        setQueried(shouldEnable);
+    }, [
+        text,
+        area,
+        perPage,
+        salaryFrom,
+        salaryTo,
+        experience,
+        providers.join(","),
+        shouldEnable,
+    ]);
 
-    // приводим enabled к булеву
-    const shouldEnable = text.trim().length > 0 && area.trim().length > 0;
-
+    // Сам запрос
     const {
         data = [],
         isLoading,
@@ -48,42 +52,46 @@ export default function VacancyList() {
             area,
             page,
             perPage,
-            providers: providers.length ? providers : undefined,
+            providers: providers.length > 0 ? providers : undefined,
             salaryFrom: salaryFrom ? Number(salaryFrom) : undefined,
             salaryTo: salaryTo ? Number(salaryTo) : undefined,
             experience: experience || undefined,
         },
         {
             query: {
-                enabled: shouldEnable,       // <-- здесь boolean
+                enabled: shouldEnable,
                 keepPreviousData: true,
             },
         }
     );
 
-    // накапливаем страницы
+    // Накопление страниц (только если нет ошибки)
     useEffect(() => {
-        if (!isLoading && queried) {
-            setItems(prev => (page === 0 ? data : [...prev, ...data]));
+        if (!isLoading && queried && !isError) {
+            setItems(prev =>
+                page === 0
+                    ? data
+                    : [
+                        ...prev,
+                        ...data,
+                    ]
+            );
         }
-    }, [data, isLoading, page, queried]);
+    }, [data, isLoading, page, queried, isError]);
 
-    // состояния UI
+    // UI-стейты
     if (isLoading && page === 0) {
-        return <Skeleton className="h-32 w-full" />;
+        return <LottieLoader />;
     }
     if (isError) {
+        const msg = (error as any)?.response?.data?.message || "Ошибка загрузки вакансий";
         return (
-            <p className="text-[var(--danger)] py-4 text-center">
-                {(error as any)?.response?.data?.message || "Ошибка загрузки вакансий"}
-            </p>
+            <p className="text-[var(--danger)] py-4 text-center">{msg}</p>
         );
     }
     if (queried && !isFetching && items.length === 0) {
         return (
-            <p className="text-center py-10 text-[var(--muted-500)]">
-                Ничего не найдено
-            </p>
+            <p className="text-center py-10 text-[var(--muted-500)]">Ничего не найдено</p>
         );
     }
 
@@ -98,7 +106,7 @@ export default function VacancyList() {
             </div>
             {!noMore && (
                 <LoadMoreButton
-                    onClick={() => setPage(p => p + 1)}
+                    onClick={() => setPage((p) => p + 1)}
                     disabled={isFetching}
                 />
             )}

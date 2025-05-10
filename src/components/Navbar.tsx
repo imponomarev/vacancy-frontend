@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
-import { usePathname, useRouter } from "next/navigation";
-import { Button } from "@heroui/react";
+import {useSession, signOut} from "next-auth/react";
+import {usePathname, useRouter} from "next/navigation";
+import {Button} from "@heroui/react";
 
 export default function Navbar() {
-    const { data: session, status } = useSession();
+    const {data: session, status} = useSession();
     const pathname = usePathname();
     const router = useRouter();
 
@@ -30,7 +30,8 @@ export default function Navbar() {
     };
 
     return (
-        <header className="sticky top-0 z-30 backdrop-blur bg-[var(--bg)]/70 dark:bg-[var(--bg)]/70 shadow-md px-6 py-3 flex items-center">
+        <header
+            className="sticky top-0 z-30 backdrop-blur bg-[var(--bg)]/70 dark:bg-[var(--bg)]/70 shadow-md px-6 py-3 flex items-center">
             <Link
                 href="/vacancies"
                 className="font-bold text-2xl tracking-tight text-[var(--primary)]"
@@ -77,14 +78,16 @@ export default function Navbar() {
                     <Button
                         size="sm"
                         variant="outline"
-                        className={`
-              text-sm
-              border border-[var(--danger)]
-              text-[var(--danger)]
-              hover:bg-[var(--danger)]/10
-              transition
-            `}
-                        onClick={() => signOut({ callbackUrl: "/login" })}
+                        className="
+                           text-sm
+                           border border-[var(--danger)]
+                           text-[var(--danger)]
+                           hover:bg-[var(--danger)]/10
+                           rounded-md        /* скругляем углы */
+                           px-3 py-1         /* добавляем горизонтальные и вертикальные отступы */
+                           transition
+                         "
+                        onClick={() => signOut({callbackUrl: "/login"})}
                     >
                         Выйти
                     </Button>

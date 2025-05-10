@@ -11,22 +11,29 @@ export default function VacancyCard({v}: { v: Vacancy }) {
         (f) => f.source === v.source && f.externalId === v.externalId
     );
 
+    // 1) Вычисляем корректную строку зарплаты
+    const from = v.salaryFrom ?? 0;
+    const to = v.salaryTo ?? 0;
+
+    let salaryDisplay: string;
+    if (from === 0 && to === 0) {
+        salaryDisplay = "ЗП не указана";
+    } else {
+        const fromStr = from > 0 ? String(from) : "…";
+        const toStr = to > 0 ? String(to) : "…";
+        salaryDisplay = `${fromStr}–${toStr} ${v.currency}`;
+    }
+
     return (
         <Card
             as="div"
             className={`
-        p-4 relative
-        bg-[var(--bg)]
-        rounded-lg
-        shadow
-        hover:shadow-lg
-        hover:ring-1 hover:ring-[var(--primary)]
-        focus:outline-none focus:ring-0
-        transition
-
-        /* скрываем этот ненужный span-индикатор */
-        [&>span]:hidden
-      `}
+                p-4 relative bg-[var(--bg)] rounded-lg shadow
+                hover:shadow-lg hover:ring-1 hover:ring-[var(--primary)]
+                focus:outline-none focus:ring-0 transition
+                /* скрываем служебный span-индикатор */
+                [&>span]:hidden`
+            }
         >
             <button
                 className="absolute top-3 right-3"
@@ -42,7 +49,7 @@ export default function VacancyCard({v}: { v: Vacancy }) {
                 )}
             </button>
 
-            <Link
+            <a
                 href={v.url}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -56,9 +63,7 @@ export default function VacancyCard({v}: { v: Vacancy }) {
                     color="primary"
                     className="mt-2 px-2 py-1 rounded-full"
                 >
-                    {v.salaryFrom
-                        ? `${v.salaryFrom}–${v.salaryTo ?? "…"} ${v.currency}`
-                        : "ЗП не указана"}
+                    {salaryDisplay}
                 </Badge>
 
                 {v.publishedAt && (
@@ -78,7 +83,7 @@ export default function VacancyCard({v}: { v: Vacancy }) {
                     Опыт: {v.experienceReq ?? "не указан"} • График:{" "}
                     {v.schedule ?? "не указан"}
                 </p>
-            </Link>
+            </a>
         </Card>
     );
 }
